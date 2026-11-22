@@ -17,6 +17,16 @@ import { buildDossier } from './vendor/makefun-game.ts';
 const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
+// Fail loudly instead of writing a partial /output when a hand-in is missing:
+// the grader runs this twice and both runs must write the same bytes, so a
+// silent partial copy would cost the entry twice over.
+if (!existsSync(join(here, 'game', 'index.html'))) {
+  throw new Error('game/index.html is missing — refusing to write a partial entry');
+}
+if (!existsSync(join(here, 'screenshots'))) {
+  throw new Error('screenshots/ is missing — refusing to write a partial entry');
+}
+
 mkdirSync(out, { recursive: true });
 cpSync(join(here, 'game'), join(out, 'game'), { recursive: true });
 mkdirSync(join(out, 'screenshots'), { recursive: true });
